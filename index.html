@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0f0f0f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-title" content="ThriftFlip" />
+<title>ThriftFlip</title>
+<link rel="manifest" href="manifest.json" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222;
+    --border: #2e2e2e;
+    --text: #f0ede8;
+    --muted: #777;
+    --green: #39e07a;
+    --green-dim: #1a3d2b;
+    --red: #ff4f4f;
+    --red-dim: #3d1a1a;
+    --accent: #f5c842;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  header {
+    padding: 3rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  header p {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  main { padding: 1.25rem; max-width: 480px; margin: 0 auto; }
+
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .player-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 180px;
+  }
+
+  .player-name::placeholder { color: var(--muted); }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .remove-btn:hover { background: var(--surface2); color: var(--red); }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .input-group label {
+    display: block;
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 5px;
+  }
+
+  .input-group input {
+    width: 100%;
+    height: 42px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    padding: 0 12px;
+    -moz-appearance: textfield;
+  }
+  .input-group input::-webkit-outer-spin-button,
+  .input-group input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .input-group input:focus { outline: none; border-color: var(--accent); }
+
+  .dollar-wrap { position: relative; }
+  .dollar-wrap span {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .dollar-wrap input { padding-left: 22px; }
+
+  .add-btn {
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .calc-btn {
+    width: 100%;
+    height: 52px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: #0f0f0f;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .calc-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+  .results { display: none; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+
+  .section-label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; }
+
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.75rem;
+  }
+  .metric-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .metric-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.04em; color: var(--text); }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .result-card.winner { border-color: var(--green); background: #111f16; }
+
+  .result-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.05em; color: var(--text); }
+  .result-sub { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+  .result-amount { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; text-align: right; }
+  .result-net { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 1px; }
+
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .neutral { color: var(--text); }
+
+  .reset-btn {
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    transition: border-color 0.15s;
+  }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ThriftFlip</h1>
+  <p>Who flipped best? Find out.</p>
+</header>
+
+<main>
+  <div id="players" style="margin-top: 1.25rem;"></div>
+  <button class="add-btn" onclick="addPlayer()">+ add player</button>
+  <button class="calc-btn" onclick="calculate()">Calculate Payouts</button>
+  <div class="results" id="results"></div>
+</main>
+
+<script>
+let players = [
+  { id: 1, name: 'Player 1', spent: '', made: '' },
+  { id: 2, name: 'Player 2', spent: '', made: '' },
+  { id: 3, name: 'Player 3', spent: '', made: '' }
+];
+let nextId = 4;
+
+function fmt(n) { return '$' + Math.round(n); }
+function fmtSigned(n) { return (n >= 0 ? '+$' : '-$') + Math.abs(Math.round(n)); }
+
+function render() {
+  document.getElementById('players').innerHTML = players.map(p => `
+    <div class="player-card">
+      <div class="player-header">
+        <input class="player-name" value="${p.name}" oninput="updateName(${p.id}, this.value)" placeholder="Name" />
+        ${players.length > 2 ? `<button class="remove-btn" onclick="removePlayer(${p.id})">remove</button>` : ''}
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Spent</label>
+          <div class="dollar-wrap"><span>$</span>
+            <input type="number" inputmode="numeric" min="0" step="1" value="${p.spent}" oninput="updateField(${p.id},'spent',this.value)" placeholder="0" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Made</label>
+          <div class="dollar-wrap"><span>$</span>
+            <input type="number" inputmode="numeric" min="0" step="1" value="${p.made}" oninput="updateField(${p.id},'made',this.value)" placeholder="0" />
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateName(id, val) { players.find(p => p.id === id).name = val || 'Player'; }
+function updateField(id, field, val) { players.find(p => p.id === id)[field] = val; }
+
+function addPlayer() {
+  players.push({ id: nextId++, name: `Player ${players.length + 1}`, spent: '', made: '' });
+  render();
+  document.getElementById('results').style.display = 'none';
+}
+
+function removePlayer(id) {
+  if (players.length <= 2) return;
+  players = players.filter(p => p.id !== id);
+  render();
+  document.getElementById('results').style.display = 'none';
+}
+
+function calculate() {
+  for (const p of players) {
+    if (p.spent === '' || p.made === '') { alert('Fill in all fields first!'); return; }
+  }
+
+  const data = players.map(p => {
+    const spent = Math.round(parseFloat(p.spent));
+    const made = Math.round(parseFloat(p.made));
+    const profit = made - spent;
+    const roi = spent > 0 ? profit / spent : 0;
+    return { ...p, spent, made, profit, roi };
+  });
+
+  const totalSpent = data.reduce((s, p) => s + p.spent, 0);
+  const totalMade = data.reduce((s, p) => s + p.made, 0);
+  const totalProfit = totalMade - totalSpent;
+
+  const winners = data.filter(p => p.roi > 0);
+  const totalROI = winners.reduce((s, p) => s + p.roi, 0);
+
+  const payouts = data.map(p => {
+    let payout = p.spent;
+    if (p.roi > 0 && totalProfit > 0) {
+      payout += Math.round((p.roi / totalROI) * totalProfit);
+    }
+    return { ...p, payout, net: payout - p.spent };
+  });
+
+  payouts.sort((a, b) => b.net - a.net);
+  const topPlayer = payouts[0];
+
+  const res = document.getElementById('results');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="section-label">Summary</div>
+    <div class="summary-grid">
+      <div class="metric"><div class="metric-label">Spent</div><div class="metric-value">${fmt(totalSpent)}</div></div>
+      <div class="metric"><div class="metric-label">Made</div><div class="metric-value">${fmt(totalMade)}</div></div>
+      <div class="metric"><div class="metric-label">Profit</div><div class="metric-value ${totalProfit >= 0 ? 'pos' : 'neg'}">${fmt(totalProfit)}</div></div>
+    </div>
+
+    <div class="section-label">Payouts</div>
+    ${payouts.map(p => `
+      <div class="result-card ${p.id === topPlayer.id && p.net > 0 ? 'winner' : ''}">
+        <div>
+          <div class="result-name">${p.id === topPlayer.id && p.net > 0 ? '👑 ' : ''}${p.name}</div>
+          <div class="result-sub">spent ${fmt(p.spent)} · made ${fmt(p.made)} · ${Math.round(p.roi * 100)}% ROI</div>
+        </div>
+        <div>
+          <div class="result-amount ${p.net > 0 ? 'pos' : p.net < 0 ? 'neg' : 'neutral'}">${fmt(p.payout)}</div>
+          <div class="result-net">${fmtSigned(p.net)}</div>
+        </div>
+      </div>
+    `).join('')}
+
+    <button class="reset-btn" onclick="resetGame()">reset game</button>
+  `;
+
+  res.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetGame() {
+  players = [
+    { id: 1, name: 'Player 1', spent: '', made: '' },
+    { id: 2, name: 'Player 2', spent: '', made: '' },
+    { id: 3, name: 'Player 3', spent: '', made: '' }
+  ];
+  nextId = 4;
+  render();
+  document.getElementById('results').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js');
+  });
+}
+</script>
+</body>
+</html>
